@@ -23,26 +23,24 @@ var transferVolumes = {}
 
 async function onTransfer(tevent) {
     var amt = BigInt(tevent.amount) / BigInt(1e6) // ignore fractional
-    // if (stablecoins.includes(tevent.symbol) && amt > 1e5) {
-    // take action on whale transfer across chains
-    // console.log("chain, txHash, amount")
-    // console.log(tevent.chain, "| ", tevent.txHash, " | ", amt, " | ", tevent.symbol);
-    // }
     if (transferVolumes[tevent.chain + " " + tevent.tokenAddress] === undefined) {
-        transferVolumes[tevent.chain + " " + tevent.tokenAddress] = BigInt(0);
+        transferVolumes[tevent.chain + " " + tevent.tokenAddress] = {
+            lastTx: tevent.txHash,
+            volume: BigInt(0),
+        }
     }
 
-    transferVolumes[tevent.chain + " " + tevent.tokenAddress] += amt;
+    transferVolumes[tevent.chain + " " + tevent.tokenAddress].volume += amt;
+    transferVolumes[tevent.chain + " " + tevent.tokenAddress].lastTx = tevent.txHash;
 }
 
 
 setInterval(() => {
     console.log("-------------------------------------------")
     for (const key in transferVolumes) {
-        console.log(key, ":", transferVolumes[key]);
+        console.log(`${key}: ${transferVolumes[key].volume} (last tx: ${transferVolumes[key].lastTx})\n`);
     }
     console.log("-------------------------------------------")
-
 }, 10_000); // 10,000 ms = 10 seconds
 
 
