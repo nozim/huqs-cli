@@ -3,6 +3,7 @@ module github.com/nozim/huqs-cli
 go 1.23.5
 
 require (
+	github.com/coder/websocket v1.8.14
 	github.com/spf13/cobra v1.10.1
 	gopkg.in/yaml.v3 v3.0.1
 )
