@@ -19,6 +19,7 @@ import (
 	"syscall"
 )
 
+// const serverURL = "https://huqs.heimdahl.xyz"
 const serverURL = "http://localhost:9099"
 
 type RegisterRequest struct {
@@ -35,7 +36,21 @@ type StartRequest struct {
 	Payload string `json:"payload"`
 }
 
+type DeployRequest struct {
+	UserID  string `json:"user_id"`
+	Name    string `json:"name"`
+	Version string `json:"version"`
+	Payload string `json:"payload"`
+}
+
 type StartResponse struct {
+	InvocationID string `json:"invocation_id"`
+	Name         string `json:"name"`
+	Version      string `json:"version"`
+	Status       string `json:"status"`
+}
+
+type DeployResponse struct {
 	InvocationID string `json:"invocation_id"`
 	Name         string `json:"name"`
 	Version      string `json:"version"`
@@ -64,7 +79,7 @@ type StopResponse struct {
 
 var playCmd = &cobra.Command{
 	Use:   "play",
-	Short: "Play the current huq node as a Docker container",
+	Short: "Play the current huq as a Docker container",
 	Run: func(cmd *cobra.Command, args []string) {
 		// 1️⃣ Read huq.yaml
 		data, err := os.ReadFile("huq.yaml")
@@ -188,9 +203,10 @@ var playCmd = &cobra.Command{
 		startRequest.Header.Set("Content-Type", "application/json")
 		startRequest.Header.Set("Authorization", token)
 
-		//w := httptest.NewRecorder()
-		resp4, _ := http.DefaultClient.Do(stopReq)
-
+		resp4, err := http.DefaultClient.Do(stopReq)
+		if err != nil {
+			log.Fatalf("failed to invoke huq stop  %s", err)
+		}
 		var stopResp StopResponse
 
 		err = json.NewDecoder(resp4.Body).Decode(&stopResp)

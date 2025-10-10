@@ -27,6 +27,7 @@ func Execute() {
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(buildCmd)
 	rootCmd.AddCommand(playCmd)
+	rootCmd.AddCommand(deployCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

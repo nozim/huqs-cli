@@ -16,7 +16,20 @@
   position: 42n
 }
 */
+const TelegramBot = require('node-telegram-bot-api');
+const botToken = '8212113338:AAHC9dde2AeyWiPbG5IpLSnWzVPLxjKwdd0';
+const bot = new TelegramBot(botToken, {polling: true});
 
+var subscribers = [];
+
+// Anyone who messages the bot gets added
+bot.on('message', (msg) => {
+    const chatId = msg.chat.id;
+    if (!subscribers.includes(chatId)) {
+        subscribers.push(chatId);
+        bot.sendMessage(chatId, 'Added! You will get updates every 1 min');
+    }
+});
 
 var stablecoins = ['USDC', 'USDT', 'DAI']
 
@@ -34,8 +47,11 @@ async function onTransfer(tevent) {
     var amt = BigInt(tevent.amount) / BigInt(1e6) // ignore fractional
     if (senders[key] === undefined) {
         senders[key] = {
-            lastTx: tevent.txHash,
             volume: BigInt(0),
+            chain: tevent.chain,
+            address: tevent.fromAddress,
+            symbol: tevent.symbol,
+            lastTx: tevent.txHash
         }
     }
 
@@ -45,31 +61,24 @@ async function onTransfer(tevent) {
 }
 
 setInterval(() => {
+    if (subscribers.length === 0) return;
+
     const sorted = Object.entries(senders)
-        .sort((a, b) => {
-            if (a[1].volume > b[1].volume) return -1;
-            if (a[1].volume < b[1].volume) return 1;
-            return 0;
-        })
+        .sort((a, b) => b[1].volume > a[1].volume ? 1 : -1)
         .slice(0, 10);
 
-    // Clear console before printing new data
-    console.clear();
+    let msg = '<b>🏆 Top 10 Senders (1 min)</b>\n\n';
 
-    const now = new Date().toISOString();
-    console.log(`\n=== Top 10 senders by volume @ ${now} ===\n`);
-
-    sorted.forEach(([key, info], index) => {
-        console.log(
-            `${(index + 1).toString().padStart(2, " ")}. ${key} → ${info.volume.toString()} (lastTx: ${info.lastTx})`
-        );
+    sorted.forEach(([key, data], i) => {
+        msg += `${i + 1}. <b>${data.chain.toUpperCase()} ${data.symbol}</b>\n`;
+        msg += `   💰 Volume: $${data.volume.toLocaleString()}\n`;
+        msg += `   👤 Address:\n   <code>${data.address}</code>\n`;
+        msg += `   🔗 Last Tx:\n   <code>${data.lastTx}</code>\n\n`;
     });
 
-    if (sorted.length === 0) {
-        console.log("No senders yet.");
-    }
+    subscribers.forEach(chatId => {
+        bot.sendMessage(chatId, msg, {parse_mode: 'HTML'});
+    });
 
-    console.log("\n----------------------------------------\n");
-}, 20000);
-
+}, 60 * 1000);
 module.exports = onTransfer;
