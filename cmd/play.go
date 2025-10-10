@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/coder/websocket"
+	pb "github.com/nozim/huqs-cli/proto"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/proto"
 	"gopkg.in/yaml.v3"
 	"io"
 	"log"
@@ -162,15 +164,14 @@ var playCmd = &cobra.Command{
 					log.Printf("failed to read ws message %s", err)
 					continue
 				}
-
-				var out OutputMessage
-				err = json.Unmarshal(b, &out)
+				var out pb.OutputMessage
+				err = proto.Unmarshal(b, &out)
 				if err != nil {
 					log.Printf("failed to decode ws message %s", err)
 					continue
 				}
 
-				log.Printf("%v\n", out)
+				fmt.Printf("%v\n", out.Line)
 
 			}
 		}()

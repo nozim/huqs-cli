@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package proto;
+
+// Optional: define the Go package option if you're using protoc-gen-go
+option go_package = ".";
+
+message OutputMessage {
+  string huq_name = 1;
+  string huq_version = 2;
+  string invocation_id = 3;
+  string source = 4;
+  string line = 5;
+}
