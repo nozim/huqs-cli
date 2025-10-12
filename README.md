@@ -16,9 +16,13 @@ Download binary Get the latest release from GitHub releases
 or build from repo:
 
 ```bash
-git clone https://github.com/nozim/huqs-cli.git
-go build -o huq .
-sudo cp ./huq /usr/local/bin
+$ export PATH=$PATH:$GOBIN // to make sure your go binaries are discoverable by shell
+$ git clone https://github.com/nozim/huqs-cli.git
+$ go build -o $GOBIN/huq .
+$ huq                      
+
+Huq verision: 0.0.1
+
 ```
 
 ## Quick Start
@@ -26,8 +30,8 @@ sudo cp ./huq /usr/local/bin
 #### 1. Create a new huq:
 
 ```bash
-huq init whale-tracker
-cd whale-tracker
+$ huq init whale-tracker
+$ cd whale-tracker
 ```
 
 #### 2. Edit main.js:
@@ -50,8 +54,8 @@ module.exports = onTransfer;
 #### 4. Test it locally:
 
 ```bash
- huq play   
-2025/10/12 20:55:17 {"imageTag":"simple-w:0.0.1","status":"huq registered"}                                                                                             
+$ huq play   
+2025/10/12 20:55:17 {"imageTag":"whale-tracke:0.0.1","status":"huq registered"}                                                                                             
 Press Ctrl+C to stop                      
 STARTING                                                                                                                                                                
 RUNNING                                   
@@ -87,9 +91,9 @@ EXITED
 #### 5. Deploy it:
 
 ```bash
- huq deploy 
-2025/10/12 20:59:21 {"imageTag":"simple-w:0.0.1","status":"huq registered"}
-2025/10/12 20:59:21 {fb8fe8df-e874-4677-94e3-d164101151c9 simple-w 0.0.1 RUNNING}
+$ huq deploy 
+2025/10/12 20:59:21 {"imageTag":"whale-tracke:0.0.1","status":"huq registered"}
+2025/10/12 20:59:21 {fb8fe8df-e874-4677-94e3-d164101151c9 whale-tracke 0.0.1 RUNNING}
 ````
 
 #### 6. Done.
