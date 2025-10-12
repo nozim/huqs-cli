@@ -10,61 +10,38 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//const entryPointBody = `const onTransfer = require("./main");
-//
-//async function readStdin() {
-//    return new Promise((resolve, reject) => {
-//        let data = "";
-//        process.stdin.setEncoding("utf8");
-//
-//        process.stdin.on("data", chunk => {
-//            data += chunk;
-//        });
-//
-//        process.stdin.on("end", () => {
-//            resolve(data);
-//        });
-//
-//        process.stdin.on("error", reject);
-//    });
-//}
-//
-//(async () => {
-//    try {
-//        const input = await readStdin();
-//        const parsed = JSON.parse(input); // expecting { event: ..., context: ... }
-//
-//        const result = onTransfer(parsed, {});
-//
-//        if (result instanceof Promise) {
-//            const awaited = await result;
-//            console.log(JSON.stringify(awaited, null, 2));
-//        } else {
-//            console.log(JSON.stringify(result, null, 2));
-//        }
-//    } catch (err) {
-//        console.error("Error:", err.message);
-//        process.exit(1);
-//    }
-//})();`
-
 const callbackBody = `// tevent format is following
 /*
 {
-  timestamp: Date.now(), // e.g. 1694567890123
+  timestamp: 1694567890123,
   fromAddress: "0x1234567890abcdef1234567890abcdef12345678",
-  fromOwner: { value: "Alice" }, // optional
+  fromOwner: '0xSolanaFromOwner', // exists only for solana. spl token sender owner address 
   toAddress: "0xabcdef1234567890abcdef1234567890abcdef12",
-  toOwner: { value: "Bob" },     // optional
-  amount: "1000000000000000000",  // string for big.Int
-  tokenAddress: "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+  toOwner: '0xSolanaToOwner',  // exists only for solana. spl token receiver owner address 
+  amount: "1000000000000000000", 
+  tokenAddress: "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef", // erc20 or trc20 or spl-token mint address
   symbol: "USDT",
-  chain: "Ethereum",
+  chain: "ethereum",
   network: "mainnet",
   txHash: "0xa1b2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef",
   decimals: 18,
-  position: 42n
+  position: 42 // abstract for block or slot 
 }
+*/
+
+/*
+Init your bot here
+const TelegramBot = require('node-telegram-bot-api');
+const botToken = '// your token here';
+const bot = new TelegramBot(botToken, {polling: true});
+*/
+
+/*
+ OR 
+ const { Axiom } = require('@axiomhq/js');
+ or use built in node js fetch api. 
+ 
+ More built in standard libraries are coming soon, stay tuned ;)
 */
 
 var stablecoins = ['USDC','USDT', 'DAI']
@@ -75,27 +52,29 @@ async function onTransfer(tevent) {
         // take action on whale transfer across chains
         console.log("chain, txHash, amount")
         console.log(tevent.chain,"| ", tevent.txHash," | ", amt, " | ", tevent.symbol);
+ 		
+		// OR 
+		// send notification to your telegram bot 
+		// bot.send .../
+
+		// OR 
+		// send slack message to your chat 
+		// axiom ...
+
+
+		// OR 
+		// store it to your database via http 
+		// axiom ...
+	
+
+		// OR 
+		// call your own backend to handle processing  
+		// axiom ...
+ 
     }
 }
 
 module.exports = onTransfer;`
-
-//
-//const dockerBody = `# Use the latest Node.js LTS image from Docker Hub
-//FROM node:latest
-//
-//# Set working directory inside the container
-//WORKDIR /usr/src/app
-//
-//# Copy package.json if you have dependencies (optional)
-//# COPY package*.json ./
-//# RUN npm install --production
-//
-//# Copy all project files into the container
-//COPY . .
-//
-//# Run your main.js file with Node.js
-//CMD ["node", "entrypoint.js"]`
 
 type Config struct {
 	Name    string `yaml:"name"`
@@ -127,19 +106,6 @@ var initCmd = &cobra.Command{
 			fmt.Println("Error writing YAML:", err)
 			return
 		}
-
-		// Create empty Dockerfile
-		//dockerfilePath := filepath.Join(folder, "Dockerfile")
-		//if err := os.WriteFile(dockerfilePath, []byte(dockerBody), 0644); err != nil {
-		//	fmt.Println("Error writing Dockerfile:", err)
-		//	return
-		//}
-
-		//entrypointPath := filepath.Join(folder, "entrypoint.js")
-		//if err := os.WriteFile(entrypointPath, []byte(entryPointBody), 0644); err != nil {
-		//	fmt.Println("Error writing Dockerfile:", err)
-		//	return
-		//}
 
 		main := filepath.Join(folder, "main.js")
 		if err := os.WriteFile(main, []byte(callbackBody), 0644); err != nil {

@@ -19,8 +19,9 @@ import (
 	"syscall"
 )
 
-// const serverURL = "https://huqs.heimdahl.xyz"
-const serverURL = "http://localhost:9099"
+const serverURL = "https://huqs.heimdahl.xyz"
+
+//const serverURL = "http://localhost:9099"
 
 type RegisterRequest struct {
 	Name     string `json:"name"`
@@ -177,7 +178,7 @@ var playCmd = &cobra.Command{
 				_, b, err := conn.Read(context.Background())
 				if err != nil {
 					log.Printf("failed to read ws message %s", err)
-					continue
+					return
 				}
 				var out pb.OutputMessage
 				err = proto.Unmarshal(b, &out)
