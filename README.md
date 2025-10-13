@@ -11,7 +11,7 @@ No nodes. No infrastructure. Just code.
 
 ## Installation
 
-Download binary Get the latest release from GitHub releases
+Download binary Get the latest release for your OS from [GitHub releases](https://github.com/nozim/huqs-cli/releases)
 
 or build from repo:
 
