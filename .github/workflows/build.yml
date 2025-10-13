@@ -1,0 +1,73 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - master  # Trigger workflow on pushes to the 'main.go' branch
+  pull_request:
+    branches:
+      - master  # Optional: Run on pull requests to 'main.go'
+
+jobs:
+  build:
+    name: Build, Compress, and Deploy
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:latest
+      options: --user root
+    permissions:
+      contents: write
+      pull-requests: write
+
+    strategy:
+      matrix:
+        os: [ linux, darwin, windows ]
+        arch: [ amd64, arm64 ]
+
+    env:
+      GO_VERSION: '1.23'
+      CGO_ENABLED: 0
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install make
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt update
+          apt-get install -y make ca-certificates jq zip git curl file nodejs npm
+
+      # Step 2: Set up Go environment
+      - name: Set up Go ${{ env.GO_VERSION }}
+        uses: actions/setup-go@v5
+        env:
+          ImageOS: ${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.goarm }}
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Set Short SHA in Environment
+        run: |
+          echo "GIT_REV=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
+
+      # Step 3: Build the application
+      - name: Build
+        env:
+          GOOS: ${{ matrix.os }}
+          GOARCH: ${{ matrix.arch }}
+          GOARM: ${{ matrix.goarm }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          make binary
+
+      # Step 4: Release the package
+      - name: Release
+        env:
+          GOOS: ${{ matrix.os }}
+          GOARCH: ${{ matrix.arch }}
+          GOARM: ${{ matrix.goarm }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_DISCOVERY_ACROSS_FILESYSTEM: 1
+          GIT_REV: ${{ env.GIT_REV }}
+        run: |
+          make release
