@@ -1,6 +1,6 @@
 # Multi-Chain Top Senders Bot
 
-Real-time Telegram bot tracking top 5 token senders across all major blockchains, updated every minute.
+Real-time Telegram bot tracking top 3 token senders across all major blockchains, updated every minute.
 
 ## What it does
 
