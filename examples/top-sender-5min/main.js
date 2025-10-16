@@ -63,23 +63,31 @@ async function onTransfer(tevent) {
 setInterval(() => {
     if (subscribers.length === 0) return;
 
-    const sorted = Object.entries(senders)
-        .sort((a, b) => b[1].volume > a[1].volume ? 1 : -1)
-        .slice(0, 10);
+    var grouped = {}
+    for (const key of Object.keys(senders)) {
+        const chain = key.split(" ");
+        grouped[chain] = senders[key];
+    }
 
-    let msg = '<b>🏆 Top 10 Senders (1 min)</b>\n\n';
+    console.log(grouped);
 
-    sorted.forEach(([key, data], i) => {
-        msg += `${i + 1}. <b>${data.chain.toUpperCase()} ${data.symbol}</b>\n`;
-        msg += `   💰 Volume: $${data.volume.toLocaleString()}\n`;
-        msg += `   👤 Address:\n   <code>${data.address}</code>\n`;
-        msg += `   🔗 Last Tx:\n   <code>${data.lastTx}</code>\n\n`;
-    });
+    // const sorted = Object.entries(senders)
+    //     .sort((a, b) => b[1].volume > a[1].volume ? 1 : -1)
+    //     .slice(0, 10);
+    //
+    // let msg = '<b>🏆 Top 10 Senders (1 min)</b>\n\n';
+    //
+    // sorted.forEach(([key, data], i) => {
+    //     msg += `${i + 1}. <b>${data.chain.toUpperCase()} ${data.symbol}</b>\n`;
+    //     msg += `   💰 Volume: $${data.volume.toLocaleString()}\n`;
+    //     msg += `   👤 Address:\n   <code>${data.address}</code>\n`;
+    //     msg += `   🔗 Last Tx:\n   <code>${data.lastTx}</code>\n\n`;
+    // });
+    //
+    // subscribers.forEach(chatId => {
+    //     bot.sendMessage(chatId, msg, {parse_mode: 'HTML'});
+    // });
 
-    subscribers.forEach(chatId => {
-        bot.sendMessage(chatId, msg, {parse_mode: 'HTML'});
-    });
-
-}, 60 * 1000);
+}, 5 * 1000);
 
 module.exports = onTransfer;

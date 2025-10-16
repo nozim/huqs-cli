@@ -39,7 +39,7 @@ setInterval(() => {
         console.log(`${key}: ${transferVolumes[key].volume} (last tx: ${transferVolumes[key].lastTx})\n`);
     }
     console.log("-------------------------------------------")
-}, 10_000); // 10,000 ms = 10 seconds
+}, 2_000); // 10,000 ms = 10 seconds
 
 
 module.exports = onTransfer;
