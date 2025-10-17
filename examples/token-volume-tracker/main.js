@@ -19,27 +19,66 @@
 
 var transferVolumes = {}
 
+const seenTransfers = new Map();
+
 async function onTransfer(tevent) {
+    if (tevent.symbol === 'unknown' || tevent.symbol === undefined) {
+        return
+    }
+
+    const key = `${tevent.chain}-${tevent.txHash}-${tevent.tokenAddress}-${tevent.fromAddress}`;
+
+    if (seenTransfers.has(key)) {
+        // Duplicate, ignore
+        return;
+    }
+
+    // Mark this key as seen
+    seenTransfers.set(key, Date.now());
+
     var amt = BigInt(tevent.amount) / BigInt(1e6) // ignore fractional
-    if (transferVolumes[tevent.chain + " " + tevent.tokenAddress] === undefined) {
-        transferVolumes[tevent.chain + " " + tevent.tokenAddress] = {
+
+    if (transferVolumes[tevent.chain] === undefined) {
+        transferVolumes[tevent.chain] = new Map();
+    }
+
+    if (transferVolumes[tevent.chain][tevent.symbol] === undefined) {
+        transferVolumes[tevent.chain][tevent.symbol] = {
             lastTx: tevent.txHash,
+            transfers: 1,
             volume: BigInt(0),
         }
     }
 
-    transferVolumes[tevent.chain + " " + tevent.tokenAddress].volume += amt;
-    transferVolumes[tevent.chain + " " + tevent.tokenAddress].lastTx = tevent.txHash;
+    transferVolumes[tevent.chain][tevent.symbol].volume += amt;
+    transferVolumes[tevent.chain][tevent.symbol].transfers += 1;
+    transferVolumes[tevent.chain][tevent.symbol].lastTx = tevent.txHash;
 }
 
+const maxAge = 30 * 60 * 1000; // 30 minutes
 
 setInterval(() => {
+    const now = Date.now();
+    // pruning old entries
+    for (const [key, timestamp] of seenTransfers.entries()) {
+        if (now - timestamp > maxAge) {
+            seenTransfers.delete(key);
+        }
+    }
+
     console.log("-------------------------------------------")
-    for (const key in transferVolumes) {
-        console.log(`${key}: ${transferVolumes[key].volume} (last tx: ${transferVolumes[key].lastTx})\n`);
+    for (const chain in transferVolumes) {
+        console.log(`Chain ${chain}:`);
+        for (const token in transferVolumes[chain]) {
+
+            console.log(`    ${token}:
+            volume ${transferVolumes[chain][token].volume.toLocaleString()}\n
+            transfers ${transferVolumes[chain][token].transfers}\n
+            (last tx: ${transferVolumes[chain][token].lastTx})\n`);
+        }
     }
     console.log("-------------------------------------------")
-}, 2_000); // 10,000 ms = 10 seconds
+}, 10_000); // 10,000 ms = 10 seconds
 
 
 module.exports = onTransfer;

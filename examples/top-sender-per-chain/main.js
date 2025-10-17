@@ -214,10 +214,23 @@ class ChainTokenLeaderboard {
 
 const lb = new ChainTokenLeaderboard({topN: 3});
 
+const seenTransfers = new Set();
+
+
 async function onTransfer(tevent) {
     if (tevent.symbol === 'unknown' || tevent.symbol === undefined) {
         return;
     }
+
+    const key = `${tevent.chain}-${tevent.txHash}-${tevent.tokenAddress}-${tevent.fromAddress}`;
+
+    if (seenTransfers.has(key)) {
+        // Duplicate, ignore
+        return;
+    }
+
+    // Mark this key as seen
+    seenTransfers.add(key);
 
     lb.update(tevent);
 }

@@ -3,9 +3,9 @@
 {
   timestamp: Date.now(), // e.g. 1694567890123
   fromAddress: "0x1234567890abcdef1234567890abcdef12345678",
-  fromOwner: { value: "Alice" }, // optional
+  fromOwner: '0x1234567890abcdef1234567890abcdef12345678', // optional
   toAddress: "0xabcdef1234567890abcdef1234567890abcdef12",
-  toOwner: { value: "Bob" },     // optional
+  toOwner: '0x1234567890abcdef1234567890abcdef12345678',     // optional
   amount: "1000000000000000000",  // string for big.Int
   tokenAddress: "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
   symbol: "USDT",
@@ -38,7 +38,7 @@ var grouped = {};
 
 var chains = {};
 
-async function onTransfer(tevent) {
+async function onTransfer(tevent) { // this will be invoked on every onchain transfer
     if (!stablecoins.includes(tevent.symbol)) {
         return;
     }
@@ -69,25 +69,24 @@ setInterval(() => {
         grouped[chain] = senders[key];
     }
 
-    console.log(grouped);
 
-    // const sorted = Object.entries(senders)
-    //     .sort((a, b) => b[1].volume > a[1].volume ? 1 : -1)
-    //     .slice(0, 10);
-    //
-    // let msg = '<b>🏆 Top 10 Senders (1 min)</b>\n\n';
-    //
-    // sorted.forEach(([key, data], i) => {
-    //     msg += `${i + 1}. <b>${data.chain.toUpperCase()} ${data.symbol}</b>\n`;
-    //     msg += `   💰 Volume: $${data.volume.toLocaleString()}\n`;
-    //     msg += `   👤 Address:\n   <code>${data.address}</code>\n`;
-    //     msg += `   🔗 Last Tx:\n   <code>${data.lastTx}</code>\n\n`;
-    // });
-    //
-    // subscribers.forEach(chatId => {
-    //     bot.sendMessage(chatId, msg, {parse_mode: 'HTML'});
-    // });
+    const sorted = Object.entries(senders)
+        .sort((a, b) => b[1].volume > a[1].volume ? 1 : -1)
+        .slice(0, 10);
 
-}, 5 * 1000);
+    let msg = '<b>🏆 Top 10 Senders (1 min)</b>\n\n';
+
+    sorted.forEach(([key, data], i) => {
+        msg += `${i + 1}. <b>${data.chain.toUpperCase()} ${data.symbol}</b>\n`;
+        msg += `   💰 Volume: $${data.volume.toLocaleString()}\n`;
+        msg += `   👤 Address:\n   <code>${data.address}</code>\n`;
+        msg += `   🔗 Last Tx:\n   <code>${data.lastTx}</code>\n\n`;
+    });
+
+    subscribers.forEach(chatId => {
+        bot.sendMessage(chatId, msg, {parse_mode: 'HTML'});
+    });
+
+}, 60 * 1000);
 
 module.exports = onTransfer;
