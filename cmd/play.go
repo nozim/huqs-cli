@@ -19,9 +19,9 @@ import (
 	"syscall"
 )
 
-//const serverURL = "http://huqs.heimdahl.xyz"
+const serverURL = "http://huqs.heimdahl.xyz"
 
-const serverURL = "http://localhost:9099"
+//const serverURL = "http://localhost:9099"
 
 type RegisterRequest struct {
 	Name     string `json:"name"`
