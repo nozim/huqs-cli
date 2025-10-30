@@ -1,6 +1,8 @@
 # Huqs CLI
 
-Build real-time blockchain applications with JavaScript.
+
+
+Build real-time blockchain applications with JavaScript. [Youtube demo](https://www.youtube.com/watch?v=YMnCjZw4avM)
 
 ## What is Huqs?
 
